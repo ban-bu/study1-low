@@ -6,20 +6,26 @@ warnings.filterwarnings('ignore')
 from PIL import Image, ImageDraw
 import requests
 from io import BytesIO
-# 添加try-except处理cairosvg导入
+
+# 处理可选依赖 - 移除直接导入cairosvg
+# 设置标志变量来跟踪哪些库可用
+CAIROSVG_AVAILABLE = False
+SVGLIB_AVAILABLE = False
+
 try:
     import cairosvg
     CAIROSVG_AVAILABLE = True
-except ImportError:
-    CAIROSVG_AVAILABLE = False
-    # 尝试导入备选SVG处理库
+except (ImportError, OSError) as e:
+    # 如果是系统级缺少依赖而不仅仅是库未安装
+    st.warning("cairosvg库无法加载，尝试使用备选SVG处理方法。错误信息: " + str(e))
+    # 尝试加载备选库
     try:
         from svglib.svglib import svg2rlg
         from reportlab.graphics import renderPM
         SVGLIB_AVAILABLE = True
     except ImportError:
-        SVGLIB_AVAILABLE = False
-        st.warning("SVG处理库未安装，SVG格式转换功能将不可用")
+        st.warning("SVG处理库未安装或加载失败，SVG格式转换功能将不可用。将尝试直接处理图像。")
+
 import base64
 import numpy as np
 import os
@@ -27,11 +33,17 @@ import pandas as pd
 import uuid
 import datetime
 import json
+import re
 
 # Requires installation: pip install streamlit-image-coordinates
-from streamlit_image_coordinates import streamlit_image_coordinates
-from streamlit.components.v1 import html
-from streamlit_drawable_canvas import st_canvas
+try:
+    from streamlit_image_coordinates import streamlit_image_coordinates
+    from streamlit.components.v1 import html
+    from streamlit_drawable_canvas import st_canvas
+    INTERACTIVE_COMPONENTS_AVAILABLE = True
+except ImportError:
+    st.warning("交互组件库(streamlit-image-coordinates/streamlit-drawable-canvas)未安装，一些交互功能将不可用")
+    INTERACTIVE_COMPONENTS_AVAILABLE = False
 
 # 导入OpenAI配置
 from openai import OpenAI
