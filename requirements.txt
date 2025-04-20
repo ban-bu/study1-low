@@ -1,0 +1,13 @@
+streamlit
+Pillow
+openai
+streamlit-image-coordinates
+streamlit-drawable-canvas
+pandas
+numpy
+watchdog==6.0.0
+
+# 可选依赖（用于SVG处理）
+cairosvg
+svglib
+reportlab
